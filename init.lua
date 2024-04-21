@@ -91,7 +91,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -102,8 +102,15 @@ vim.g.have_nerd_font = false
 vim.opt.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
+vim.opt.relativenumber = true
 
+vim.opt.smartindent = true
+
+vim.opt.termguicolors = true
+
+vim.opt.colorcolumn = '80'
+
+vim.opt.isfname:append '@-@'
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
 
@@ -129,7 +136,7 @@ vim.opt.smartcase = true
 vim.opt.signcolumn = 'yes'
 
 -- Decrease update time
-vim.opt.updatetime = 250
+vim.opt.updatetime = 50
 
 -- Decrease mapped sequence wait time
 -- Displays which-key popup sooner
@@ -149,7 +156,7 @@ vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 vim.opt.inccommand = 'split'
 
 -- Show which line your cursor is on
-vim.opt.cursorline = true
+vim.opt.cursorline = false
 
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
@@ -157,8 +164,11 @@ vim.opt.scrolloff = 10
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
+-- Rebind :Ex to <leader>pv
+vim.keymap.set('n', '<leader>pv', vim.cmd.Ex)
+
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
-vim.opt.hlsearch = true
+vim.opt.hlsearch = false
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
@@ -225,6 +235,73 @@ vim.opt.rtp:prepend(lazypath)
 --
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
+  {
+    'nvim-tree/nvim-tree.lua',
+    dependencies = 'nvim-tree/nvim-web-devicons',
+    config = function()
+      local nvimtree = require 'nvim-tree'
+
+      -- recommended settings from nvim-tree documentation
+      vim.g.loaded_netrw = 1
+      vim.g.loaded_netrwPlugin = 1
+
+      nvimtree.setup {
+        view = {
+          width = 35,
+          relativenumber = true,
+        },
+        -- change folder arrow icons
+        renderer = {
+          indent_markers = {
+            enable = true,
+          },
+          icons = {
+            glyphs = {
+              folder = {
+                arrow_closed = '', -- arrow when folder is closed
+                arrow_open = '', -- arrow when folder is open
+              },
+            },
+          },
+        },
+        -- disable window_picker for
+        -- explorer to work well with
+        -- window splits
+        actions = {
+          open_file = {
+            window_picker = {
+              enable = false,
+            },
+          },
+        },
+        filters = {
+          custom = { '.DS_Store' },
+        },
+        git = {
+          ignore = false,
+        },
+      }
+
+      -- set keymaps
+      local keymap = vim.keymap -- for conciseness
+
+      keymap.set('n', '<leader>te', '<cmd>NvimTreeToggle<CR>', { desc = 'Toggle file explorer' }) -- toggle file explorer
+      keymap.set('n', '<leader>tf', '<cmd>NvimTreeFindFileToggle<CR>', { desc = 'Toggle file explorer on current file' }) -- toggle file explorer on current file
+      keymap.set('n', '<leader>tc', '<cmd>NvimTreeCollapse<CR>', { desc = 'Collapse file explorer' }) -- collapse file explorer
+      keymap.set('n', '<leader>tr', '<cmd>NvimTreeRefresh<CR>', { desc = 'Refresh file explorer' }) -- refresh file explorer
+    end,
+  },
+  {
+    'christoomey/vim-tmux-navigator', -- tmux & split window navigation
+  },
+
+  checker = {
+    enabled = true,
+    notify = false,
+  },
+  change_detection = {
+    notify = false,
+  },
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
 
@@ -556,9 +633,10 @@ require('lazy').setup({
       local servers = {
         -- clangd = {},
         -- gopls = {},
-        -- pyright = {},
-        -- rust_analyzer = {},
-        -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
+        pyright = {},
+        cmake = {},
+        texlab = {},
+        -- rust_analyzer = {}, ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
         --    https://github.com/pmizio/typescript-tools.nvim
@@ -799,32 +877,105 @@ require('lazy').setup({
       -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
       -- - sd'   - [S]urround [D]elete [']quotes
       -- - sr)'  - [S]urround [R]eplace [)] [']
-      require('mini.surround').setup()
+      -- require('mini.surround').setup()
 
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
       --  and try some other statusline plugin
-      local statusline = require 'mini.statusline'
+      --local statusline = require 'mini.statusline'
       -- set use_icons to true if you have a Nerd Font
-      statusline.setup { use_icons = vim.g.have_nerd_font }
-
+      -- statusline.setup { use_icons = vim.g.have_nerd_font }
       -- You can configure sections in the statusline by overriding their
       -- default behavior. For example, here we set the section for
       -- cursor location to LINE:COLUMN
       ---@diagnostic disable-next-line: duplicate-set-field
-      statusline.section_location = function()
-        return '%2l:%-2v'
-      end
+      -- statusline.section_location = function()
+      -- return '%2l:%-2v'
+      -- end
 
       -- ... and there is more!
       --  Check out: https://github.com/echasnovski/mini.nvim
     end,
   },
+  {
+    'nvim-lualine/lualine.nvim',
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
+    config = function()
+      local lualine = require 'lualine'
+      local lazy_status = require 'lazy.status' -- to configure lazy pending updates count
+
+      local colors = {
+        blue = '#65D1FF',
+        green = '#3EFFDC',
+        violet = '#FF61EF',
+        yellow = '#FFDA7B',
+        red = '#FF4A4A',
+        fg = '#c3ccdc',
+        bg = '#112638',
+        inactive_bg = '#2c3043',
+      }
+
+      local my_lualine_theme = {
+        normal = {
+          a = { bg = colors.blue, fg = colors.bg, gui = 'bold' },
+          b = { bg = colors.bg, fg = colors.fg },
+          c = { bg = colors.bg, fg = colors.fg },
+        },
+        insert = {
+          a = { bg = colors.green, fg = colors.bg, gui = 'bold' },
+          b = { bg = colors.bg, fg = colors.fg },
+          c = { bg = colors.bg, fg = colors.fg },
+        },
+        visual = {
+          a = { bg = colors.violet, fg = colors.bg, gui = 'bold' },
+          b = { bg = colors.bg, fg = colors.fg },
+          c = { bg = colors.bg, fg = colors.fg },
+        },
+        command = {
+          a = { bg = colors.yellow, fg = colors.bg, gui = 'bold' },
+          b = { bg = colors.bg, fg = colors.fg },
+          c = { bg = colors.bg, fg = colors.fg },
+        },
+        replace = {
+          a = { bg = colors.red, fg = colors.bg, gui = 'bold' },
+          b = { bg = colors.bg, fg = colors.fg },
+          c = { bg = colors.bg, fg = colors.fg },
+        },
+        inactive = {
+          a = { bg = colors.inactive_bg, fg = colors.semilightgray, gui = 'bold' },
+          b = { bg = colors.inactive_bg, fg = colors.semilightgray },
+          c = { bg = colors.inactive_bg, fg = colors.semilightgray },
+        },
+      }
+
+      -- configure lualine with modified theme
+      lualine.setup {
+        options = {
+          theme = my_lualine_theme,
+        },
+        sections = {
+          lualine_x = {
+            {
+              lazy_status.updates,
+              cond = lazy_status.has_updates,
+              color = { fg = '#ff9e64' },
+            },
+            { 'encoding' },
+            { 'fileformat' },
+            { 'filetype' },
+          },
+        },
+      }
+    end,
+  },
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
+    dependencies = {
+      'windwp/nvim-ts-autotag',
+    },
     opts = {
-      ensure_installed = { 'bash', 'c', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc', 'python', 'typescript' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -833,6 +984,10 @@ require('lazy').setup({
         --  If you are experiencing weird indenting issues, add the language to
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
         additional_vim_regex_highlighting = { 'ruby' },
+        -- enable autotagging (w/ nvim-ts-autotag plugin)
+        autotag = {
+          enable = true,
+        },
       },
       indent = { enable = true, disable = { 'ruby' } },
     },
@@ -852,7 +1007,13 @@ require('lazy').setup({
       --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
     end,
   },
-
+  {
+    'rose-pine/neovim',
+    name = 'rose-pine',
+    config = function()
+      vim.cmd 'colorscheme rose-pine'
+    end,
+  },
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- place them in the correct locations.
@@ -863,7 +1024,7 @@ require('lazy').setup({
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
   -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
   -- require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
@@ -896,6 +1057,5 @@ require('lazy').setup({
     },
   },
 })
-
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
