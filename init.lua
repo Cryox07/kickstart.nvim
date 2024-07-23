@@ -179,7 +179,7 @@ vim.opt.scrolloff = 10
 --  See `:help vim.keymap.set()`
 
 -- Rebind :Ex to <leader>pv
-vim.keymap.set('n', '<leader>pv', vim.cmd.exit)
+vim.keymap.set('n', '<leader>pv', vim.cmd.exit, { desc = 'Exit Nivm' })
 
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.opt.hlsearch = false
@@ -601,7 +601,6 @@ require('lazy').setup({
           -- Execute a code action, usually your cursor needs to be on top of an error
           -- or a suggestion from your LSP for this to activate.
           map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
-
           -- Opens a popup that displays documentation about the word under your cursor
           --  See `:help K` for why this keymap.
           map('K', vim.lsp.buf.hover, 'Hover Documentation')
@@ -668,6 +667,8 @@ require('lazy').setup({
         markdown_oxide = {},
         matlab_ls = {},
         vimls = {},
+        clangd = {},
+        ast_grep = {},
 
         -- rust_analyzer = {}, ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -711,6 +712,8 @@ require('lazy').setup({
         'tsserver',
         'cmake',
         'texlab',
+        'ast_grep',
+        'clangd',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
