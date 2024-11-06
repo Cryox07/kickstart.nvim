@@ -392,6 +392,7 @@ require('lazy').setup({
         ['<leader>g'] = { name = '[G]it', _ = 'which_key_ignore' },
         ['<leader>ga'] = { name = '[G]it [A]dd', _ = 'which_key_ignore' },
         ['<leader>h'] = { name = '[H]arpoon', _ = 'which_key_ignore' },
+        ['<leader>o'] = { name = '[O]pen Nvim plugins', _ = 'which_key_ignore' },
       }
       -- visual mode
       require('which-key').register({
@@ -662,7 +663,7 @@ require('lazy').setup({
         pyright = {},
         cmake = {},
         texlab = {},
-        tsserver = {},
+        -- tsserver = {},
         bashls = {},
         html = {},
         markdown_oxide = {},
@@ -710,11 +711,13 @@ require('lazy').setup({
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
         'pyright',
-        'tsserver',
+        -- 'tsserver',
         'cmake',
         'texlab',
         'ast_grep',
         'clangd',
+        'clang-format',
+        'google-java-format',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -885,7 +888,7 @@ require('lazy').setup({
     -- Change the name of the colorscheme plugin below, and then
     -- change the command in the config to whatever the name of that colorscheme is.
     --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
+    -- If: you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
     'folke/tokyonight.nvim',
     priority = 1000, -- Make sure to load this before all the other start plugins.
     init = function()
